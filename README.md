@@ -1,5 +1,18 @@
 # ShakeShakeShake
+------
 GalvanizeU Data Engineering Final Project
+
+Visit this: [Website](http://ec2-34-200-221-198.compute-1.amazonaws.com/) fo
+
+
+Dataset:
+------
+Tree types found in the Roosevelt National Forest in Colorado.
+[Earthquake API Call](https://earthquake.usgs.gov/fdsnws/event/1/)
+
+
+
+
 
 earthquake.py uses API documentation from
 "https://earthquake.usgs.gov/fdsnws/event/1/#methods"
