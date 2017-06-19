@@ -1,8 +1,13 @@
-# ShakeShakeShake
-GalvanizeU Data Engineering Final Project
+# GalvanizeU Data Engineering Final Project
 ------
 
-This project makes daily API calls to query data from USGS.gov Earthquake Catalog: [API Call](https://earthquake.usgs.gov/fdsnws/event/1/)
+## Introduction: 
+
+This project is an end to end data engineering pipeline making API calls to query data from USGS.gov Earthquake Catalog: [API Call](https://earthquake.usgs.gov/fdsnws/event/1/). Historical earthquake data is updated daily, plotted using matplotlib and then deployed using a Flask app web server. Libraries used via the Amazon Web Services (EC2, RDS, EMR, and s3) platform include: requests, cron, boto, pyscopg2, and sqlalchemy.
+
+------
+
+## Workflow
 
 The raw data was sent to an AWS s3 bucket using boto (to make a connection to s3) and requests (to make the API call). 
 
@@ -12,13 +17,13 @@ A daily cron job continues to collect earthquakes at 00:01 UTC '1 0 * * *' (5:00
 
 Another daily cron job is set to connect to the most recent s3 file. It then uses pyscopg2 to insert select data into the RDS table with all of the previous day's earthquakes.
 
-To create the website [Most Recent Earthquake Data](http://ec2-34-200-221-198.compute-1.amazonaws.com/), the data is then queried with sqlalchemy and pandas to create dataframes. matplotlib uses the dataframes to create graphs. The dataframes are stored as html and along with the graphs are uploaded to a website using a flask webserver. 
+To create the website [Most Recent Earthquake Data](http://ec2-34-200-221-198.compute-1.amazonaws.com/), the data is then queried with sqlalchemy and pandas to create dataframes and store them as html. Graphs are created from these dataframes with the matplotlib library and stored in a public s3 bucket. The html version of the dataframes and the graphs are uploaded to a website using a flask webserver. 
 
 A DAG (directed acyclical graph) visualizing this framework can be found here: [DAG](https://s3.amazonaws.com/nobucketforyou/dag.pdf)
 
-
-API Call Scripts:
 ------
+
+## API Call Scripts:
 
 1. quakes.py
 - Initial script created to access the API.
@@ -32,20 +37,34 @@ API Call Scripts:
 4. retroactive_day.py
 - Due to a failure of the EC2 instance, this script can pass any number of days as an argument to retroactively pull missing days
 
-
-Database scripts:
 ------
+
+## Database scripts:
 
 1. daily_rds.py 
 - Connects to the most recent s3 file using boto. It then uses pyscopg2 to update the RDS table with the s3 file's data.
 
-
-Flask scripts:
 ------
 
+## Flask app scripts:
+
 1. flasksql.py
-- Uses sqlalchemy to query an RDS table and pandas to create dataframes. matplotlib uses the dataframes to create graphs. The dataframes are stored as html and along with the graphs are uploaded to a website using a flask webserver.
+- Uses sqlalchemy to query an RDS table and pandas to create dataframes and store them as html. Graphs are created from these dataframes with the matplotlib library and stored in a public s3 bucket. The html version of the dataframes and the graphs are uploaded to a website using a flask webserver. 
 
-
-Room for improvement
 ----
+
+## Room for improvement (Version 2.0)
+
+1. At the moment, using a script to determine the max/min latitude and longitude (rectangular) coordinates per state.
+  - Dictionaries of state/city/country polygon coordinates could be created and used to query more precise boundaries. 
+
+
+
+2. Currently the first cron job is schedulded to run at 00:05:00 UTC. A subsequent cron job runs five minutes later, but relies on the proper execution of the first cron job to produce accurate results.
+  - A Directed Acyclic Graph scheduling technology, such as Airflow, could be used in place of cron.
+  - Error messages could be put in place to send alerts via email. 
+  
+
+
+3. flasksql.py could be abstracted into a set of functions stored in another python module
+  - these functions could be generalized to preform queries and computations based on a set of coordinates (e.g. states or cities). 
