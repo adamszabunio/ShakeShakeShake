@@ -18,24 +18,21 @@ Below are two basic plots that are created daily from querying the relational da
 
 ## Workflow
 
-![](images/fiveSs.pdf?raw=true)
-*NOTE arrows in this image were only used to connect the columns
+![](images/fiveSs.png?raw=true)
+NOTE arrows in this image were only used to connect the columns
 
 The raw data was sent to an AWS s3 bucket using boto (to make a connection to s3) and requests (to make the API call). 
 
 To gather more data, a script was written to collect all earthquake events from the latest upgrade to the USGS.gov feed (May 22, 2013). All data collected up to this point (May 08, 2017) was cleaned and then transformed into 3rd Normal Form using pyspark and zepplin on an AWS EMR cluster (bootstraped with pyscopg2). This cluster used pyscopg2 to insert selected data to an AWS RDS table. 
 
-A daily cron job continues to collect earthquakes at 00:01 UTC '1 0 * * *' (5:00 PM PST) and write them to an s3 bucket. 
+A daily cron job continues to collect earthquakes at 00:01 UTC '1 0 * * *' (5:00 PM PST) and writes the records to an s3 bucket. 
 
 Another daily cron job is set to connect to the most recent s3 file. It then uses pyscopg2 to insert select data into the RDS table with all of the previous day's earthquakes.
 
 To create a [website displaying recent data](http://ec2-34-237-176-236.compute-1.amazonaws.com/), the data is queried with sqlalchemy and pandas to create dataframes and store them as html. Graphs are created from these dataframes with the matplotlib library and stored in a public s3 bucket. The html version of the dataframes and the graphs are uploaded to a website using a flask webserver. 
 
-A DAG (directed acyclical graph) visualizing this framework:
-![](images/dag.pdf?raw=true)
 
-A DAG (directed acyclical graph) visualizing this framework can be found here: [DAG](https://s3.amazonaws.com/nobucketforyou/dag.pdf)
-
+A DAG (directed acyclical graph) visualizing this framework can be found here: [DAG](images/dag.pdf)
 ------
 
 ## API Call:
